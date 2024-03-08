@@ -1,8 +1,16 @@
 pipeline {
     agent any
+
+    environment {
+        // Define the path to Maven executable
+        MAVEN_HOME = '/path/to/your/maven' // Update this with the actual path to Maven on your system
+        PATH = "$MAVEN_HOME/bin:$PATH" // Add Maven to the system PATH
+    }
+
     stages {
         stage('Build') {
             steps {
+                // Maven should be accessible now
                 sh 'mvn clean install' // Build the Maven project
                 echo 'Build Stage Successful'
             }
