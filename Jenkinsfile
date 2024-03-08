@@ -1,41 +1,31 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:14' // Use Node.js 14 Docker image as the agent
-        }
-    }
+    agent any
     stages {
-        stage('Clone repository') {
+        stage('Build') {
             steps {
-                git branch: 'main', url: 'https://github.com/tejaswinib01/PES2UG21CS114_Jenkins.git' // Clone the repository
+                sh 'mvn clean install' // Build the Maven project
+                echo 'Build Stage Successful'
             }
         }
-        stage('Install dependencies') {
+        stage('Test') {
             steps {
-                sh 'npm install' // Install Node.js dependencies
+                sh 'mvn test' // Run tests for the Maven project
+                echo 'Test Stage Successful'
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml' // Publish JUnit test results
+                }
             }
         }
-        stage('Build application') {
+        stage('Deploy') {
             steps {
-                sh 'npm run build' // Build the Node.js application
-            }
-        }
-        stage('Test application') {
-            steps {
-                sh 'npm test' // Run tests for the application
-            }
-        }
-        stage('Push Docker image') {
-            steps {
-                sh 'docker build -t <user>/<image>:$BUILD_NUMBER .' // Build Docker image
-                sh 'docker push <user>/<image>:$BUILD_NUMBER' // Push Docker image to repository
+                sh 'mvn deploy' // Deploy the Maven project
+                echo 'Deployment Successful'
             }
         }
     }
     post {
-        always {
-            echo 'Pipeline finished'
-        }
         failure {
             echo 'Pipeline failed'
         }
